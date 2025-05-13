@@ -30,7 +30,7 @@ struct ClassFinder {
         let classes = self.allClasses().filter { foundClass in
             var anyClass: AnyClass? = foundClass
             while let foundClass = anyClass {
-                if class_conformsToProtocol(foundClass, `protocol`) { return true }
+                if let foundClass = NSClassFromString(className), class_conformsToProtocol(foundClass, `protocol`) { return true }
                 anyClass = class_getSuperclass(foundClass)
             }
             return false
