@@ -11,6 +11,7 @@
 //
 
 import Foundation
+import ObjectiveC.runtime
 
 struct ClassFinder {
     private static func allClasses() -> [AnyClass] {
@@ -26,15 +27,18 @@ struct ClassFinder {
         return []
     }
 
-    static func classes(conformToProtocol `protocol`: Protocol) -> [AnyClass] {
-        let classes = self.allClasses().filter { foundClass in
-            var anyClass: AnyClass? = foundClass
-            while let foundClass = anyClass {
-                if class_conformsToProtocol(foundClass, `protocol`) { return true }
-                anyClass = class_getSuperclass(foundClass)
+    static func classes(conformToProtocol targetProtocol: Protocol) -> [AnyClass] {
+        return allClasses().filter { candidateClass in
+            var currentClass: AnyClass? = candidateClass
+            while let cls = currentClass {
+                // Ensure cls is a proper Objective-C class
+                if class_isMetaClass(cls) == false &&
+                   class_conformsToProtocol(cls, targetProtocol) {
+                    return true
+                }
+                currentClass = class_getSuperclass(cls)
             }
             return false
         }
-        return classes
     }
 }
